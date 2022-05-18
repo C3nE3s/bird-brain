@@ -1,7 +1,17 @@
 import type { NextPage } from "next";
+import { signIn } from "next-auth/react";
 import Head from "next/head";
 
+// Avoid useProvider call because only twitter is used as provider
+const TWITTER_PROVIDER_ID = "twitter";
+
 const Home: NextPage = () => {
+  const handleLogin = () => {
+    signIn(TWITTER_PROVIDER_ID, {
+      callbackUrl: `/dashboard`,
+    });
+  };
+
   return (
     <div className="">
       <Head>
@@ -10,7 +20,18 @@ const Home: NextPage = () => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <main className=""></main>
+      <main
+        className=""
+        style={{ display: "grid", placeItems: "center", height: "100vh" }}
+      >
+        <button
+          id="login"
+          style={{ height: "4rem", width: "8rem", fontSize: "2rem" }}
+          onClick={handleLogin}
+        >
+          Login
+        </button>
+      </main>
     </div>
   );
 };

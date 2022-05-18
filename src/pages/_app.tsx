@@ -1,11 +1,10 @@
-import "../styles/globals.css";
 import { withTRPC } from "@trpc/next";
 import { AppType } from "next/dist/shared/lib/utils";
 import { AppRouter } from "./api/trpc/[trpc]";
 import { getSession, SessionProvider } from "next-auth/react";
 import superjson from "superjson";
 
-const MyApp: AppType = ({ Component, pageProps }) => {
+const App: AppType = ({ Component, pageProps }) => {
   return (
     <SessionProvider session={pageProps.session}>
       <Component {...pageProps} />
@@ -13,7 +12,7 @@ const MyApp: AppType = ({ Component, pageProps }) => {
   );
 };
 
-MyApp.getInitialProps = async ({ ctx }) => {
+App.getInitialProps = async ({ ctx }) => {
   return {
     pageProps: {
       session: await getSession(ctx),
@@ -48,4 +47,4 @@ export default withTRPC<AppRouter>({
    * @link https://trpc.io/docs/ssr
    */
   ssr: true,
-})(MyApp);
+})(App);

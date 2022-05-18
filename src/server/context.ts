@@ -1,4 +1,4 @@
-import { prisma } from "../utils/prisma";
+import { prisma } from "@lib/prisma";
 import * as trpc from "@trpc/server";
 import * as trpcNext from "@trpc/server/adapters/next";
 import { getSession } from "next-auth/react";

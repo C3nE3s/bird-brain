@@ -1,7 +1,7 @@
 import NextAuth from "next-auth";
 import TwitterProvider from "next-auth/providers/twitter";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
-import { prisma } from "../../../utils/prisma";
+import { prisma } from "@lib/prisma";
 
 const { TWITTER_CLIENT_ID, TWITTER_CLIENT_SECRET, NEXTAUTH_SECRET } =
   process.env;
