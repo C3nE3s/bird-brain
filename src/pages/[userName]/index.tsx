@@ -1,3 +1,4 @@
+import { useSession } from "next-auth/react";
 import type { NextPage } from "next/types";
 
 const UserHome: NextPage = () => {

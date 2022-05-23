@@ -2,7 +2,6 @@ import { withTRPC } from "@trpc/next";
 import { AppType } from "next/dist/shared/lib/utils";
 import { AppRouter } from "./api/trpc/[trpc]";
 import { getSession, SessionProvider } from "next-auth/react";
-import superjson from "superjson";
 
 const App: AppType = ({ Component, pageProps }) => {
   return (
@@ -39,7 +38,6 @@ export default withTRPC<AppRouter>({
       /**
        * @link https://react-query.tanstack.com/reference/QueryClient
        */
-      transformer: superjson,
       queryClientConfig: { defaultOptions: { queries: { staleTime: 60 } } },
     };
   },

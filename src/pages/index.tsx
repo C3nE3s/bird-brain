@@ -1,14 +1,16 @@
 import type { NextPage } from "next";
-import { signIn } from "next-auth/react";
+import { signIn, useSession } from "next-auth/react";
 import Head from "next/head";
 
 // Avoid useProvider call because only twitter is used as provider
 const TWITTER_PROVIDER_ID = "twitter";
 
 const Home: NextPage = () => {
+  const { data: session, status } = useSession();
+
   const handleLogin = () => {
     signIn(TWITTER_PROVIDER_ID, {
-      callbackUrl: `/dashboard`,
+      callbackUrl: `/${session?.user?.userName}`,
     });
   };
 
@@ -28,6 +30,7 @@ const Home: NextPage = () => {
           id="login"
           style={{ height: "4rem", width: "8rem", fontSize: "2rem" }}
           onClick={handleLogin}
+          disabled={status === "authenticated"}
         >
           Login
         </button>
