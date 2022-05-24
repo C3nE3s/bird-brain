@@ -22,6 +22,9 @@ export default NextAuth({
           userName: data.username,
         };
       },
+      authorization: {
+        params: { scope: "tweet.read users.read bookmark.read bookmark.write" },
+      },
     }),
   ],
   debug: true,
