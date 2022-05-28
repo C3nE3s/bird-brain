@@ -4,7 +4,6 @@ import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import { prisma } from "../../../lib/prisma";
 import { JWT } from "next-auth/jwt";
 
-
 const { TWITTER_CLIENT_ID, TWITTER_CLIENT_SECRET, NEXTAUTH_SECRET } =
   process.env;
 
@@ -24,49 +23,48 @@ async function refreshAccessToken(token: JWT) {
         client_id: TWITTER_CLIENT_ID as string,
         client_secret: TWITTER_CLIENT_SECRET as string,
         grant_type: "refresh_token",
-        refresh_token: token.refreshToken as string
-      })
+        refresh_token: token.refreshToken as string,
+      });
 
     const response = await fetch(url, {
       headers: {
         "Content-Type": "application/x-www-form-urlencoded",
       },
       method: "POST",
-    })
+    });
 
-    const refreshToken = await response.json()
+    const refreshToken = await response.json();
 
     if (!response.ok) {
-      throw refreshToken
+      throw refreshToken;
     }
 
     // Give a 30 sec buffer
-    const now = new Date()
+    const now = new Date();
     const exp = now.setSeconds(
-      now.getSeconds() + parseInt(refreshToken.expires_in) - 10,
-    )
+      now.getSeconds() + parseInt(refreshToken.expires_in) - 10
+    );
 
     return {
       accessToken: refreshToken.access_token,
-      accessTokenExpires: exp, 
+      accessTokenExpires: exp,
       refreshToken: refreshToken.refresh_token ?? token.refreshToken, // Fall back to old refresh token
-    }
+    };
   } catch (error) {
-    console.error("Auth", error)
+    console.error("Auth", error);
 
     return {
       ...token,
       error: "RefreshAccessTokenError",
-    }
+    };
   }
 }
-
 
 export default NextAuth({
   adapter: PrismaAdapter(prisma),
   session: {
     strategy: "jwt",
-    maxAge: 2 * 60 * 60 // 2 hours
+    maxAge: 2 * 60 * 60, // 2 hours
   },
   providers: [
     TwitterProvider({
@@ -92,25 +90,28 @@ export default NextAuth({
   callbacks: {
     async jwt({ token, user, account }) {
       // returns the properties of the token that will be available to the client
-      const now = Date.now()
+      const now = Date.now();
       // Initial sign in
-      if(account && user) {
+      if (account && user) {
         return {
           accessToken: account.access_token,
-          accessTokenExpires: account.expires_at ? (now + (account.expires_at * 1000)) : (now),
+          accessTokenExpires: account.expires_at
+            ? now + account.expires_at * 1000
+            : now,
           refreshToken: account.refresh_token as string,
-        }
+        };
       }
 
-      if(token.accessTokenExpires && now < token.accessTokenExpires) {
-        return token
+      if (token.accessTokenExpires && now < token.accessTokenExpires) {
+        return token;
       }
 
-      return refreshAccessToken(token)
+      return refreshAccessToken(token);
     },
     session: async ({ session, user }) => {
-      const { id, email, emailVerified, ...sessionUserProps } = user;
+      const { email, ...sessionUserProps } = user;
       session.user = sessionUserProps;
       return session;
+    },
   },
 });
