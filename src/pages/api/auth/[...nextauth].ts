@@ -2,7 +2,6 @@ import NextAuth, { Account, User } from "next-auth";
 import TwitterProvider from "next-auth/providers/twitter";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import { prisma } from "../../../lib/prisma";
-import { JWT } from "next-auth/jwt";
 
 const { TWITTER_CLIENT_ID, TWITTER_CLIENT_SECRET, NEXTAUTH_SECRET } =
   process.env;
@@ -15,15 +14,38 @@ const PKCE_SCOPES = [
   "offline.access",
 ];
 
-async function refreshAccessToken(token: JWT) {
+interface RefreshTokenResponse {
+  id_token: string;
+  access_token: string;
+  expires_in: number;
+  token_type: string;
+  refresh_token: string;
+}
+
+async function refreshAccessToken(user: User, newAccount: Account) {
+  const now = new Date();
+
   try {
+    // find user account if it exists
+    const existingAccount = await prisma.account.findFirst({
+      where: { id: user.id },
+    });
+
+    // token is still valid, do nothing
+    if (
+      existingAccount?.expires_at &&
+      now.getSeconds() < existingAccount.expires_at
+    ) {
+      return;
+    }
+
     const url =
       "https://api.twitter.com/2/oauth2/token?" +
       new URLSearchParams({
         client_id: TWITTER_CLIENT_ID as string,
         client_secret: TWITTER_CLIENT_SECRET as string,
         grant_type: "refresh_token",
-        refresh_token: token.refreshToken as string,
+        refresh_token: existingAccount?.refresh_token as string,
       });
 
     const response = await fetch(url, {
@@ -33,39 +55,28 @@ async function refreshAccessToken(token: JWT) {
       method: "POST",
     });
 
-    const refreshToken = await response.json();
+    const refreshedToken: RefreshTokenResponse = await response.json();
 
     if (!response.ok) {
-      throw refreshToken;
+      throw { refreshedToken };
     }
 
-    // Give a 30 sec buffer
-    const now = new Date();
-    const exp = now.setSeconds(
-      now.getSeconds() + parseInt(refreshToken.expires_in) - 10
-    );
-
-    return {
-      accessToken: refreshToken.access_token,
-      accessTokenExpires: exp,
-      refreshToken: refreshToken.refresh_token ?? token.refreshToken, // Fall back to old refresh token
-    };
+    await prisma.account.update({
+      where: { id: existingAccount?.id },
+      data: {
+        refresh_token:
+          refreshedToken.refresh_token ?? existingAccount?.refresh_token,
+        access_token: refreshedToken.access_token,
+        expires_at: now.getSeconds() + refreshedToken.expires_in * 1000,
+      },
+    });
   } catch (error) {
     console.error("Auth", error);
-
-    return {
-      ...token,
-      error: "RefreshAccessTokenError",
-    };
   }
 }
 
 export default NextAuth({
   adapter: PrismaAdapter(prisma),
-  session: {
-    strategy: "jwt",
-    maxAge: 2 * 60 * 60, // 2 hours
-  },
   providers: [
     TwitterProvider({
       clientId: TWITTER_CLIENT_ID as string,
@@ -87,30 +98,14 @@ export default NextAuth({
   ],
   debug: true,
   secret: NEXTAUTH_SECRET as string,
-  callbacks: {
-    async jwt({ token, user, account }) {
-      // returns the properties of the token that will be available to the client
-      const now = Date.now();
-      // Initial sign in
-      if (account && user) {
-        return {
-          accessToken: account.access_token,
-          accessTokenExpires: account.expires_at
-            ? now + account.expires_at * 1000
-            : now,
-          refreshToken: account.refresh_token as string,
-        };
-      }
-
-      if (token.accessTokenExpires && now < token.accessTokenExpires) {
-        return token;
-      }
-
-      return refreshAccessToken(token);
+  events: {
+    async signIn({ user, account }) {
+      await refreshAccessToken(user, account);
     },
-    session: async ({ session, user }) => {
-      const { email, ...sessionUserProps } = user;
-      session.user = sessionUserProps;
+  },
+  callbacks: {
+    async session({ session, user }) {
+      session.user.userName = user.userName;
       return session;
     },
   },
