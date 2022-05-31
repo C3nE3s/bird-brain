@@ -2,17 +2,19 @@ import { trpc } from "lib/trpc";
 import type { NextPage } from "next/types";
 
 const UserDashboard: NextPage = () => {
-  const { data } = trpc.useQuery(["next-auth.getSession"], { suspense: true });
+  const { data: session } = trpc.useQuery(["next-auth.getSession"], {
+    suspense: true,
+  });
 
   return (
     <div>
-      <h1>Welcome {data?.user.name}</h1>
+      <h1>Welcome {session?.user.name}</h1>
       <a
-        href={`https://twitter.com/${data?.user.userName}`}
+        href={`https://twitter.com/${session?.user.userName}`}
         target="_blank"
         rel="noreferrer"
       >
-        @{data?.user.userName}
+        @{session?.user.userName}
       </a>
     </div>
   );

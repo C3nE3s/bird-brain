@@ -1,16 +1,15 @@
+import { trpc } from "lib/trpc";
 import type { NextPage } from "next";
-import { signIn } from "next-auth/react";
+import { signIn, signOut } from "next-auth/react";
 import Head from "next/head";
 
 // Avoid useProvider call because only twitter is used as provider
 const TWITTER_PROVIDER_ID = "twitter";
 
 const Home: NextPage = () => {
-  const handleLogin = () => {
-    signIn(TWITTER_PROVIDER_ID, {
-      callbackUrl: `/dashboard`,
-    });
-  };
+  const { data: session } = trpc.useQuery(["next-auth.getSession"], {
+    suspense: true,
+  });
 
   return (
     <div className="">
@@ -25,12 +24,20 @@ const Home: NextPage = () => {
         style={{ display: "grid", placeItems: "center", height: "100vh" }}
       >
         <button
-          id="login"
-          style={{ height: "4rem", width: "8rem", fontSize: "2rem" }}
-          onClick={handleLogin}
-          disabled={status === "authenticated"}
+          style={{ height: "4rem", width: "8rem", fontSize: "1.5rem" }}
+          onClick={
+            session
+              ? () => {
+                  signOut();
+                }
+              : () => {
+                  signIn(TWITTER_PROVIDER_ID, {
+                    callbackUrl: `/dashboard`,
+                  });
+                }
+          }
         >
-          Login
+          {session ? "Sign Out" : "Sign In"}
         </button>
       </main>
     </div>
