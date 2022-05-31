@@ -102,6 +102,9 @@ export default NextAuth({
     async signIn({ user, account }) {
       await refreshAccessToken(user, account);
     },
+    async createUser({ user }) {
+      //TODO: Call API route to populate w/ bookmarks for the first time
+    },
   },
   callbacks: {
     async session({ session, user }) {

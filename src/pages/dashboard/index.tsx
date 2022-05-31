@@ -1,9 +1,9 @@
-import { useSession } from "next-auth/react";
+import { trpc } from "lib/trpc";
 import type { NextPage } from "next/types";
 
 const UserDashboard: NextPage = () => {
-  const { data } = useSession();
-  console.log(data);
+  const { data } = trpc.useQuery(["next-auth.getSession"], { suspense: true });
+
   return (
     <div>
       <h1>Welcome {data?.user.name}</h1>

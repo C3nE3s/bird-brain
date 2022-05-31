@@ -1,15 +1,11 @@
 import type { NextPage } from "next";
-import { signIn, useSession } from "next-auth/react";
+import { signIn } from "next-auth/react";
 import Head from "next/head";
-import router from "next/router";
-import { useEffect } from "react";
 
 // Avoid useProvider call because only twitter is used as provider
 const TWITTER_PROVIDER_ID = "twitter";
 
 const Home: NextPage = () => {
-  const { data: session, status } = useSession();
-
   const handleLogin = () => {
     signIn(TWITTER_PROVIDER_ID, {
       callbackUrl: `/dashboard`,

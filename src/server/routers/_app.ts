@@ -2,8 +2,8 @@
  * This file contains the root router of the tRPC-backend
  */
 import { createRouter } from "../createRouter";
-import superjson from "superjson";
 import { userRouter } from "./user";
+import { sessionRouter } from "./session";
 
 /**
  * Create your application's root router
@@ -16,7 +16,7 @@ export const appRouter = createRouter()
    * Add data transformers
    * @link https://trpc.io/docs/data-transformers
    */
-  .transformer(superjson)
+  .merge(sessionRouter)
   .merge("user", userRouter);
 
 export type AppRouter = typeof appRouter;
