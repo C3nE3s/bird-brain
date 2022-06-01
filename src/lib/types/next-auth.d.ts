@@ -17,11 +17,12 @@ declare module "next-auth" {
   }
 }
 
-// declare module "next-auth/jwt" {
-//   interface JWT {
-//     accessToken: string | undefined;
-//     accessTokenExpires: number | undefined;
-//     refreshToken: string | undefined;
-//     error?: string;
-//   }
-// }
+declare module "next-auth/jwt" {
+  interface JWT {
+    user: User;
+    accessToken: string | null;
+    refreshToken: string;
+    accessTokenExpires: number;
+    error?: string;
+  }
+}
