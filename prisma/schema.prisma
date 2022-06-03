@@ -8,3 +8,59 @@ generator client {
   provider        = "prisma-client-js"
   previewFeatures = ["referentialIntegrity"]
 }
+
+model User {
+  id          String        @id @unique
+  preferences UserSettings?
+  bookmarks   Bookmark[]
+  createdAt   DateTime      @default(now())
+}
+
+model UserSettings {
+  id                       String  @id @default(cuid())
+  isDestructiveFlowEnabled Boolean @default(false)
+  hasDeletePermission      Boolean @default(false)
+  user                     User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId                   String  @unique
+}
+
+model Bookmark {
+  id        String   @id @unique
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
+  author    Author?
+  tags      Tag[]
+  note      Note?
+  mediaKey  String?
+  mediaType String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+}
+
+model Author {
+  id         String   @id @unique
+  bookmark   Bookmark @relation(fields: [bookmarkId], references: [id])
+  bookmarkId String   @unique
+  imageUrl   String
+  userName   String
+
+}
+
+model Tag {
+  id         String    @id @default(cuid())
+  text       String
+  Bookmark   Bookmark? @relation(fields: [bookmarkId], references: [id])
+  bookmarkId String?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+}
+
+model Note {
+  id         String   @id @default(cuid())
+  bookmark   Bookmark @relation(fields: [bookmarkId], references: [id], onDelete: Cascade)
+  bookmarkId String   @unique
+  text       String   @db.VarChar(4000)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
