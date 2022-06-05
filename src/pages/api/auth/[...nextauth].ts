@@ -1,6 +1,6 @@
-import { refreshAccessToken } from "@lib/refreshAccessToken";
+import { refreshToken } from "lib/refreshToken";
+import type { NextAuthOptions } from "next-auth";
 import NextAuth from "next-auth";
-import type { Account, User } from "next-auth";
 import type { JWT } from "next-auth/jwt/types";
 import TwitterProvider from "next-auth/providers/twitter";
 
@@ -15,7 +15,7 @@ const PKCE_SCOPES = [
   "offline.access",
 ];
 
-export default NextAuth({
+export const authOptions: NextAuthOptions = {
   providers: [
     TwitterProvider({
       clientId: TWITTER_CLIENT_ID as string,
@@ -54,7 +54,7 @@ export default NextAuth({
         return token;
       }
       // Access token has expired, try to update it
-      return refreshAccessToken(token);
+      return refreshToken(token);
     },
     async session({ session, token }) {
       session.user = token.user;
@@ -63,4 +63,6 @@ export default NextAuth({
       return session;
     },
   },
-});
+};
+
+export default NextAuth(authOptions);

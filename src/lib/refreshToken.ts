@@ -10,7 +10,7 @@ interface RefreshTokenResponse {
 
 const { TWITTER_CLIENT_ID, TWITTER_CLIENT_SECRET } = process.env;
 
-export async function refreshAccessToken(token: JWT) {
+export async function refreshToken(token: JWT) {
   const now = Date.now();
 
   try {

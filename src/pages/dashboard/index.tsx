@@ -1,5 +1,5 @@
-import { trpc } from "lib/trpc";
 import type { NextPage } from "next/types";
+import { trpc } from "utils/trpc";
 
 const UserDashboard: NextPage = () => {
   const { data: session } = trpc.useQuery(["next-auth.getSession"], {

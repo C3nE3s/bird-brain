@@ -1,7 +1,7 @@
-import { trpc } from "lib/trpc";
 import type { NextPage } from "next";
 import { signIn, signOut } from "next-auth/react";
 import Head from "next/head";
+import { trpc } from "utils/trpc";
 
 // Avoid useProvider call because only twitter is used as provider
 const TWITTER_PROVIDER_ID = "twitter";
