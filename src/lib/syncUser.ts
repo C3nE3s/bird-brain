@@ -6,12 +6,22 @@ import { prisma } from "utils/prisma";
  * @param user
  */
 export async function syncUser(user: User) {
-  const { email, ...dbUser } = user;
-  const upsertUser = await prisma.user.upsert({
+  const { id, name, image, userName } = user;
+
+  await prisma.user.upsert({
     where: {
       id: user.id,
     },
-    update: { ...dbUser },
-    create: { ...dbUser },
+    update: {
+      name: name,
+      image: image,
+      userName: userName,
+    },
+    create: {
+      id: id,
+      name: name,
+      image: image,
+      userName: userName,
+    },
   });
 }
