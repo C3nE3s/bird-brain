@@ -1,4 +1,5 @@
 import { refreshToken } from "lib/refreshToken";
+import { syncUser } from "lib/syncUser";
 import type { NextAuthOptions } from "next-auth";
 import NextAuth from "next-auth";
 import type { JWT } from "next-auth/jwt/types";
@@ -41,6 +42,7 @@ export const authOptions: NextAuthOptions = {
       const now = Date.now();
       // Initial sign in
       if (account && user) {
+        await syncUser(user);
         const accessTokenExpires = now + (account.expires_at ?? 0) * 1000;
         return {
           accessToken: account.access_token ?? "",
