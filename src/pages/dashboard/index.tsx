@@ -2,9 +2,9 @@ import type { NextPage } from "next/types";
 import { trpc } from "utils/trpc";
 
 const UserDashboard: NextPage = () => {
-  const { data: session } = trpc.useQuery(["next-auth.getSession"], {
-    suspense: true,
-  });
+    const { data: session } = trpc.nextAuth.getSession.useQuery(undefined, {
+        suspense: true,
+    });
 
   return (
     <div>

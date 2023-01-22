@@ -7,9 +7,9 @@ import { trpc } from "utils/trpc";
 const TWITTER_PROVIDER_ID = "twitter";
 
 const Home: NextPage = () => {
-  const { data: session } = trpc.useQuery(["next-auth.getSession"], {
-    suspense: true,
-  });
+    const { data: session } = trpc.nextAuth.getSession.useQuery(undefined, {
+        suspense: true,
+    });
 
   return (
     <div className="">
